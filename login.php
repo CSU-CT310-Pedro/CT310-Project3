@@ -10,8 +10,7 @@ include 'Head.php';
             <h1>Login</h1>
         </div>
 
-        <?php
-
+        <?php		
         include 'userData.php';
 
         $invalid = false;

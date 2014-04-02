@@ -3,9 +3,9 @@ $title = 'CT310 Social Networking User';
 include 'userData.php';
 include 'Head.php';
 $user= $_GET['myUser'];
-if($_SERVER["REQUEST_METHOD"]=="GET" || $_SERVER["REQUEST_METHOD"]=="POST"){
+/*if($_SERVER["REQUEST_METHOD"]=="GET" || $_SERVER["REQUEST_METHOD"]=="POST"){
     $user =  $_GET["myUser"];
-}
+}*/
 $header = $user."'s ProFile";
 ?>
 

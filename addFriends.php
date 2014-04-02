@@ -1,5 +1,8 @@
 <?php
 $title= "Add Friends";
+$myFriends= array();
+$notFriends= array();
+include 'userData.php';
 include 'Head.php';
 ?>
 
@@ -9,62 +12,43 @@ include 'Head.php';
         <?php include 'proj1Header.php'; ?>
         <h1>Manage Friends</h1>
     </div>
-
-
     <?php include 'nav.php'; ?>
     <div id="content">
         <div id="sidebar_left">
-
-
-            <?php
-            $added = false;
-            if(isset($_POST["newFriend"]) && $_POST["newFriend"]!=""){
-                $user=$_SESSION['user'];
-                $newFriend= $_POST["newFriend"];
-                $string = $_POST["user"]."\t".$_POST["newFriend"]."\n";
-                file_put_contents("requests.tsv",$string, FILE_APPEND);
-                $added = true;
-            }
-            ?>
-
-            <?php
-            $added = false;
-            if(isset($_POST["accept"]) && $_POST["accept"]!=""){
-                $user=$_SESSION['user'];
-                $newFriend= $_POST["accept"];
-                $string1 = $user."\t".$newFriend."\n";
-                $string2 = $newFriend."\t".$user."\n";
-                file_put_contents("friends.tsv",$string1, FILE_APPEND);
-                file_put_contents("friends.tsv",$string2, FILE_APPEND);
-                $added = true;
-            }
-            ?>
-
-
-
-            <?php include 'userData.php'; ?>
-
-
+		<h3>Add friends:</h3>
             <?php
             if(isset($_SESSION['user']) && $_SESSION['user']!=""){
                 $user = $_SESSION['user'];
                 ?>
 
-                <form action= " " method = "post" enctype="multipart/form-data">
-                    <input type="hidden" name="user" value="<?php echo $user; ?>">
-                    Select Friend to add: <select name="newFriend">
-                        <option value= "" >None</option>
-                        <?php
-                        foreach($users as $friend){
-                            if("$user"!="$friend" && !(in_array($friend, $userData[$user]["friends"]))){
-                                echo "<option value= ".$friend." >$friend</option>";
-                            }
-                        }
-                        ?>
-                    </select>
-                    <br/>
-                    <input type="submit" value="Send Request">
-                </form>
+                <form method="post" action="">
+				<select name="user" size="1">
+				<?php
+					$blah=$_SESSION['user'];
+					echo "<option value=\"$blah\">$blah</option>";
+				?>
+				</select>
+				<input type="submit" value="Submit" name="submit"/>
+				<?php
+				if(isset($_POST['user'])){
+					$user=$_POST['user'];
+					$notFriend = array();
+					$db = new PDO('sqlite:./users.db');
+
+					$query = "SELECT user2 FROM friends WHERE user1='$user';";
+					$friends = $db->query($query);
+					foreach($friends as $user){
+						array_push($myFriends, $user[0]);
+					}
+					$notFriend=array_diff($users, $myFriends);
+				
+					echo "<select name=\"friend\" size=\"1\">";
+					foreach($notFriend as $friend){
+						echo "<option value=\"$friend\">$friend</option>";
+					}
+				}
+				?>
+				</form>
                 <br/>
                 <br/>
 
@@ -73,46 +57,54 @@ include 'Head.php';
             else{
                 echo "You must be logged in to manage friends.";
             }
-            if($added==true){
-                echo "A friend request has been sent to $newFriend <br/>";
-            }
-            ?>
+		if(isset($_POST["accept"])){
+			$db = new PDO('sqlite:./users.db');
+			$user1=$_SESSION["user"];
+			$user2=$_POST["accept"];
+			$query = "INSERT INTO friends VALUES('$user1', '$user2');";
+			$db->exec($query);
+			
+			$query = "DELETE FROM requests WHERE user1='$user1' AND user2='$user2';";
+			$db->exec($query);
+		}
+		if(isset($_POST['friend'])){
+			$db = new PDO('sqlite:./users.db');
+			$user1 = $_SESSION['user'];
+			$user2 = $_POST['friend'];
 
+			$query = "INSERT INTO requests VALUES($user1, $user2);";
+			$friends = $db->exec($query);
+                echo "A friend request has been sent to $user2 <br/>";
+		}
+		if(isset($_SESSION['user'])){
+			echo "<h3>Requests:</h3> <br/>";
+			$user=$_SESSION['user'];
+			$db = new PDO('sqlite:./users.db');
+			$query = "SELECT user2 FROM requests WHERE user1='$user';";
+			$friends = $db->query($query);
 
-            <?php
-            if(isset($_SESSION['user'])){
-                echo "Requests: <br/>";
-                $user=$_SESSION['user'];
-                $u= array();
-                $u=$userData[$user];
+			foreach($friends as $request){
 
-                foreach($u['requests'] as $request){
+			$query = "SELECT imageurl FROM users WHERE userName='$request[0]';";
+			$OURL = $db->query($query);
+			$URL = "";
+			foreach($OURL as $O){
+				$URL = $O[0];
+			}
+					echo "<a href=\"profile.php?myUser=$request[0]\"><img src=\"$URL\" alt=\"$request[0] \'s profile picture \" height=\"40\"></a> ";
+		?>
+		<br/>
 
-
-                    if(!(in_array("$request", $userData[$user]["friends"]))){
-                        echo "<a href=\"profile.php?myUser=$request\"><img src=".$userData[$request]["picture"]." alt=".$request." height=\"40\"></a> ";
-
-                        ?>
-                        <br/>
-
-                        <form method="post" action="">
-                            <input type= "hidden" name="accept" value= "<?php echo $request;?>" />
-                            <input type= "submit" value="Accept request from <?php echo $request;?>"/></br>
-                        </form>
-                        <br/>
-
-                    <?php
-                    }
-
-                }
-            }
-
-
-
-            ?>
-
+		<form method="post" action="">
+			<input type= "hidden" name="accept" value= "<?php echo $request[0];?>" />
+			<input type= "submit" value="Accept request from <?php echo $request[0];?>"/></br>
+		</form>
+		<br/>
+		<?php
+			}
+		}
+        ?>
             <br/><br/>
-
         </div>
         <?php include 'proj1Footer.html'; ?>
     </div>
