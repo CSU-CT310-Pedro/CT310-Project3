@@ -1,5 +1,6 @@
 <?php
-$title = 'CT310 Social Networking User1';
+$title = 'CT310 Social Networking User';
+include 'userData.php';
 include 'Head.php';
 $user= $_GET['myUser'];
 if($_SERVER["REQUEST_METHOD"]=="GET" || $_SERVER["REQUEST_METHOD"]=="POST"){
@@ -10,8 +11,7 @@ $header = $user."'s ProFile";
 
     <div id="body-container">
     <div id="header">
-        <?php include 'proj1Header.php'; ?>
-        <?php include 'userData.php';
+        <?php include 'proj1Header.php';
 
         #check to see if user is making profile edit
         if(isset($_POST['name'])){
@@ -21,8 +21,7 @@ $header = $user."'s ProFile";
             $number= $_POST['number'];
             $email= $_POST['email'];
 
-
-            #update userdata
+            #update database
 			$db = new PDO('sqlite:./users.db');
 
             if(preg_match('/^[a-z0-9 .\-]+$/i', $name)){//I have no idea what you're doing here.
@@ -58,8 +57,9 @@ $header = $user."'s ProFile";
                             $flag = move_uploaded_file($_FILES["file"]["tmp_name"], "Images/".$_FILES["file"]["name"]);
                             if($flag){
                                 echo "file uploaded succefully <br/>";
-							$query = "UPDATE users SET image='Images/' WHERE userName='$user';";//TODO
-								$db->exec($query);
+								//$image = ".$_FILES[\"file\"][\"name\"]";//TODO
+								//$query = "UPDATE users SET image='Images/$image' WHERE userName='$user';";//TODO
+								//$db->exec($query);
                             }
                         }
                     }
@@ -96,57 +96,51 @@ $header = $user."'s ProFile";
 
             <?php
             if(isset($_POST['edit'])){
-
                 # profile edit form
                 ?>
-
-
                 <form action= " " method = "post" enctype="multipart/form-data">
-                    <input type="hidden" name="gender" value=""/>
-                    <input type= "hidden" name="edit" value= "false" />
+                    <!--<input type="hidden" name="gender" value=""/>   I see no reason for this 
+                    <input type= "hidden" name="edit" value= "false" />     or this   -->
                     <table class="formTbl">
-
                         <tr>
                             <td>Name:</td>
                             <td>
-                                <input type="text" name="name" value="<?php echo $userData[$user]['name']?>"/><br/>
+                                <input type="text" name="name" /><br/>
                             </td>
                         </tr>
                         <tr>
                             <td>Gender</td>
                             <td>
-                                <input type="radio" name="gender" value="Male"
-                                    <?php// if($userData[$user]['gender'] == "Male"){echo "checked";} ?> />Male
+                                <input type="radio" name="gender" value="Male"/>Male
                             </td>
                         </tr>
                         <tr>
                             <td></td>
                             <td>
-                                <input type="radio" name="gender" value="Female"
-                                    <?php //if($userData[$user]['gender'] == "Female"){echo "checked";} ?> />Female
+                                <input type="radio" name="gender" value="Female"/>Female
                             </td>
                         </tr>
                         <tr>
                             <td>PhoneNumber:</td>
                             <td>
-                                <input type="text" name="number" value="<?php echo $userData[$user]['number']?>"/><br/>
+                                <input type="text" name="number" /><br/>
                             </td>
                         </tr>
                         <tr>
                             <td>Email:</td>
                             <td>
-                                <input type="text" name="email" value="<?php echo $userData[$user]['email']?>"/><br/>
+                                <input type="text" name="email" /><br/>
                             </td>
                         </tr>
                         <tr>
                             <td>Image:</td>
                             <td>
-                                <input type="file" name="file" value="<?php echo $userData[$user]['picture']?>"><br/>
+                                <input type="file" name="file" ><br/>
                             </td>
                         </tr>
 
                     </table>
-                    <input type="submit">
+                    <input type="submit" value= "Submit">
                 </form>
 
             <?php
@@ -192,19 +186,11 @@ $header = $user."'s ProFile";
             ?>
 
             <?php
-
             #whitelist
             $ipaddr = $_SERVER ['REMOTE_ADDR'];
             list($first, $second, $third, $forth) = explode('.', $ipaddr);
-            if(
-                (strcmp($first,"129")==0 && strcmp($second,"82")==0)
-                || strcmp($first,"::1")==0
-                || (strcmp($first,"67")==0 && strcmp($second,"174")==0 && strcmp($third,"106")==0 && strcmp($forth,"156")==0)
-
-            )
-
-            {
-                if($_SESSION['user']=="$user" && $_POST['edit']!="true"){
+            if(IpCheck()!=0 && isset($_SESSION['user'])){
+                if($_SESSION['user']=="$user" && !isset($_POST['edit'])){
                     #show edit button of this is the logged in users profile
                     ?>
                     <form method="post" action="">
@@ -215,25 +201,19 @@ $header = $user."'s ProFile";
                 <?php
                 }
             }
-            ?>
-
-
-
-
-            <?php
-
+			else{
+				echo "</br> You need to be whitelisted and logged in to edit!";
+			}
             echo "<h2>Friends</h2>";
 				$friends = getUsersFriends($user);
             foreach($friends as $friend){
 				$s = getImageURL($friend[0]);
 				foreach($s as $source){
-					echo "<a href=\"profile.php?myUser=$friend\"><img src=\"$source[0]\" alt=\"$friend\" height=\"40\"></a>";
+					echo "<a href=\"profile.php?myUser=$friend[0]\"><img src=\"$source[0]\" alt=\"$friend[0]\" height=\"40\"></a>";
 				}
-                //
             }
             ?>
         </div>
-
         <?php include 'proj1Footer.html'; ?>
     </div>
     </div>

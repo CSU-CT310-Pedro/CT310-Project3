@@ -3,31 +3,20 @@ $title= "Add User";
 include 'Head.php';
 ?>
 <div id="body-container">
-
 <div id="header">
     <?php include 'proj1Header.php'; ?>
     <h1>Add User</h1>
 </div>
-
-
 <?php include 'nav.php'; ?>
-
 
 <div id="content">
     <div id="sidebar_left">
         <?php
         include 'userData.php';
-
-        $ipaddr = $_SERVER ['REMOTE_ADDR'];
-        list($first, $second, $third, $forth) = explode('.', $ipaddr);
-        ?>
-        <?php
         if(IpCheck()==0){
-			if($_SESSION['user'] == "admin"){
+			if($_SESSION['user'] == "admin"){//multiple users can be admin
                 ?>
-
-                <form action= " " method = "post" enctype="multipart/form-data">
-                    <input type="hidden" name="gender" value=""/>
+                <form action= "addUser.php" method = "post" enctype="multipart/form-data">
                     <table class="formTbl">
                         <tr>
                             <td>UserName:</td>
@@ -95,21 +84,10 @@ include 'Head.php';
             else{
                 echo "Only admins can add users";
             }
-            ?>
-
-
-        <?php
         }
         else{
             echo "Your IP address is not white listed.";
         }
-        ?>
-
-
-        <?php
-
-
-
         $user = $_POST["user"];
         $passwd = $_POST["passwd"];
         $confPasswd = $_POST["confpasswd"];
@@ -118,32 +96,22 @@ include 'Head.php';
         $number= $_POST["number"];
         $email= $_POST["email"];
 
-
-        /*  echo"username is ".$username."</br>";
-        echo"password is ".$passwd."</br>";
-        echo"hash is ".$md5passwd."</br>";*/
-
         if(preg_match("/^[A-z0-9]+$/",$user)){
             if(preg_match("/^(?!.*\s).{8,}$/",$passwd)){
                 if("$passwd"=="$confPasswd"){
                     if(preg_match('/^[a-z0-9 .\-]+$/i', $name)){
                         if(preg_match("/^([1]-)?[0-9]{3}-[0-9]{3}-[0-9]{4}$/i", $number)){
                             if(preg_match("/^[_a-z0-9-]+(.[_a-z0-9-]+)*@[a-z0-9-]+(.[a-z0-9-]+)*(.[a-z]{2,3})$/i", $email)){
-
                                 if(isset($_FILES["file"])){
-                                    #print_r($_FILES["file"]);
-                                    #echo $_FILES["file"]["tmp_name"];
                                     echo "<br/>";
                                     if($_FILES["file"]["error"]==0){
                                         $type = explode("/",$_FILES["file"]["type"]);
                                         if($type[0]="image"){
                                             if($_FILES["file"]["size"]<1000000){
-
                                                 if(!(in_array($_POST["user"] ,$users))){
                                                     $flag = move_uploaded_file($_FILES["file"]["tmp_name"], "Images/".$_FILES["file"]["name"]);
                                                     if($flag){
                                                         echo "User added succefully <br/>";
-
                                                         #add check for passwd
                                                         $md5hash= md5($_POST["passwd"]);
 
@@ -151,43 +119,23 @@ include 'Head.php';
                                                         file_put_contents("users.tsv",$string, FILE_APPEND);
                                                     }
                                                 }
-                                                else{
-                                                    echo "User already exists <br/>";
-                                                }
+                                                else{echo "User already exists <br/>";}
                                             }
-                                            else{
-                                                echo "File is too big <br/>";
-                                            }
+                                            else{echo "File is too big <br/>";}
                                         }
-                                        else{
-                                            echo "File is not an image <br/>";
-                                        }
+                                        else{echo "File is not an image <br/>";}
                                     }
                                 }
-
-
                             }
-                            else{
-                                echo "Invalid email <br/>";
-                            }
-
+                            else{echo "Invalid email <br/>";}
                         }
-                        else{
-                            echo "Invalid phone number: (1-###-###-####) <br/>";
-                        }
-
+                        else{echo "Invalid phone number: (1-###-###-####) <br/>";}
                     }
-                    else{
-                        echo "Names has invalid characters <br/>";
-                    }
+                    else{echo "Names has invalid characters <br/>";}
                 }
-                else{
-                    echo "Passwords do not match <br/>";
-                }
+                else{echo "Passwords do not match <br/>";}
             }
-            else{
-                echo"Password must be eight characters long <br/>";
-            }
+            else{echo"Password must be eight characters long <br/>";}
         }
         else{
             if(isset($_POST["user"])){

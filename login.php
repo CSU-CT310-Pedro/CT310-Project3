@@ -66,7 +66,7 @@ include 'Head.php';
                 }
                 else {
                     ?>
-                    <form method="post" action="">
+                    <form method="post" action=""><!-- We might consider directing it to the users page -->
                         <input type= "hidden" name="logout" vaule= "false" />
                         <?php
                         if($invalid==true){
