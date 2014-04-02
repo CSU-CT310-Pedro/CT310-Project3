@@ -18,13 +18,23 @@ include 'Head.php';
 
         if($_SERVER["REQUEST_METHOD"]=="POST"){
             if(isset($_POST["user"])){
+				$db = new PDO('sqlite:./users.db');
+				
                 $user = $_POST["user"];
-                $md5hash = md5($_POST["passwd"]);
+                $md5hash = md5(strip_tags($_POST["passwd"]));
 
-                if($userData[$user]["password"] == "$md5hash"){
+				$query = "SELECT hash FROM users WHERE userName='$user';";
+				$OHash = $db->query($query);//gets the hash as an object
+				$hash="";
+				foreach($OHash as $hash1){
+					$hash = $hash1[0];
+				}
+                if($hash == "$md5hash"){
                     $_SESSION['user'] = $user;
                 }
                 else{
+					echo "$user";
+					echo "$hash";
                     $invalid= true;
                 }
             }

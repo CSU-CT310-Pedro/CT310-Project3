@@ -1,7 +1,7 @@
 <?php
 $title = 'CT310 Social Networking User1';
 include 'Head.php';
-$user = "";
+$user= $_GET['myUser'];
 if($_SERVER["REQUEST_METHOD"]=="GET" || $_SERVER["REQUEST_METHOD"]=="POST"){
     $user =  $_GET["myUser"];
 }
@@ -23,38 +23,33 @@ $header = $user."'s ProFile";
 
 
             #update userdata
+			$db = new PDO('sqlite:./users.db');
 
-            if(preg_match('/^[a-z0-9 .\-]+$/i', $name)){
-                $userData[$user]['name']= "$name";
+            if(preg_match('/^[a-z0-9 .\-]+$/i', $name)){//I have no idea what you're doing here.
+				$query = "UPDATE users SET realName='$name' WHERE userName='$name';";//I don't know if we're supposed to set userName or realName
+				$db->exec($query);
             }
             else{
                 echo "Names has invalid characters <br/>";
             }
             if(preg_match("/^([1]-)?[0-9]{3}-[0-9]{3}-[0-9]{4}$/i", $number)){
-                $userData[$user]['number']= "$number";
+                $query = "UPDATE users SET phone='$number' WHERE userName='$user';";
+				$db->exec($query);
             }
             else{
                 echo "Invalid phone number: (1-###-###-####) <br/>";
             }
             if(preg_match("/^[_a-z0-9-]+(.[_a-z0-9-]+)*@[a-z0-9-]+(.[a-z0-9-]+)*(.[a-z]{2,3})$/i", $email)){
-                $userData[$user]['email']= "$email";
+                $query = "UPDATE users SET email='$email' WHERE userName='$user';";
+				$db->exec($query);
             }
             else{
                 echo "Invalid email <br/>";
             }
-
-
-
-
-
-            $userData[$user]['gender']= "$gender";
-
-
-
+            $query = "UPDATE users SET gender='$gender' WHERE userName='$user';";
+			$db->exec($query);
 
             if(isset($_FILES["file"])){
-                #print_r($_FILES["file"]);
-                #echo $_FILES["file"]["tmp_name"];
                 echo "<br/>";
                 if($_FILES["file"]["error"]==0){
                     $type = explode("/",$_FILES["file"]["type"]);
@@ -63,8 +58,8 @@ $header = $user."'s ProFile";
                             $flag = move_uploaded_file($_FILES["file"]["tmp_name"], "Images/".$_FILES["file"]["name"]);
                             if($flag){
                                 echo "file uploaded succefully <br/>";
-
-                                $userData[$user]['picture']= "Images".$_FILES['file']['name'];
+							$query = "UPDATE users SET image='Images/' WHERE userName='$user';";//TODO
+								$db->exec($query);
                             }
                         }
                     }
@@ -75,34 +70,23 @@ $header = $user."'s ProFile";
                 else{
                 }
             }
-
-            #write new user data to file
-
-            $string = "user\tpassword\tname\tpicture\tgender\tnumber\temail\n";
-            file_put_contents("users.tsv",$string);
-
-            foreach($users as $u){
-                $string = $userData[$u]['user']."\t".$userData[$u]['password']."\t".$userData[$u]['name']."\t".$userData[$u]['picture']."\t".$userData[$u]['gender']."\t".$userData[$u]['number']."\t".$userData[$u]['email']."\n";
-                file_put_contents("users.tsv",$string, FILE_APPEND);
-            }
-
-        }
-
+		}
         ?>
     </div>
 
     <?php include "nav.php" ?>
 
     <div id="content">
-
-        <?php
-        $user= $_GET['myUser'];
-
-        ?>
-
         <div id="sidebar_left">
             <div class="pict">
-                <img class="full" src="<?php echo $userData[$user]["picture"];?>" alt="<?php echo $user;?>'s profile picture" />
+				<?php 
+				$s = getImageURL($user);
+				foreach($s as $URL){
+					//print_r($URL[0]);
+					echo "<img class=\"full\" src=\"$URL[0] \" alt=\"$user's profile picture\"/>";
+				}
+				?>
+                
             </div>
         </div>
 
@@ -111,7 +95,7 @@ $header = $user."'s ProFile";
 
 
             <?php
-            if($_POST['edit']=="true"){
+            if(isset($_POST['edit'])){
 
                 # profile edit form
                 ?>
@@ -132,14 +116,14 @@ $header = $user."'s ProFile";
                             <td>Gender</td>
                             <td>
                                 <input type="radio" name="gender" value="Male"
-                                    <?php if($userData[$user]['gender'] == "Male"){echo "checked";} ?> />Male
+                                    <?php// if($userData[$user]['gender'] == "Male"){echo "checked";} ?> />Male
                             </td>
                         </tr>
                         <tr>
                             <td></td>
                             <td>
                                 <input type="radio" name="gender" value="Female"
-                                    <?php if($userData[$user]['gender'] == "Female"){echo "checked";} ?> />Female
+                                    <?php //if($userData[$user]['gender'] == "Female"){echo "checked";} ?> />Female
                             </td>
                         </tr>
                         <tr>
@@ -169,12 +153,38 @@ $header = $user."'s ProFile";
             }
             elseif(isset($_SESSION['user'])){
                 #show profile info if user is logged in
-                ?>
-                Name: <?php echo $userData[$user]["name"];?> <br/>
-                Gender: <?php echo $userData[$user]["gender"];?> <br/>
-                Phone Number: <?php echo $userData[$user]["number"];?> <br/>
-                Email: <?php echo $userData[$user]["email"];?> <br/>
-            <?php
+				$db = new PDO('sqlite:./users.db');
+				$query = "SELECT userName FROM users WHERE userName='$user';";
+				$Oname = $db->query($query);
+				$name="";
+				foreach($Oname as $name1){
+					$name = $name1[0];
+				}
+
+				$query = "SELECT gender FROM users WHERE userName='$user';";
+				$Ogender = $db->query($query);
+				$gender="";
+				foreach($Ogender as $gender1){
+					$gender = $gender1[0];
+				}
+
+				$query = "SELECT phone FROM users WHERE userName='$user';";
+				$OPhone = $db->query($query);
+				$phone="";
+				foreach($OPhone as $phone1){
+					$phone = $phone1[0];
+				}
+
+				$query = "SELECT email FROM users WHERE userName='$user';";
+				$Oemail = $db->query($query);
+				$email="";
+				foreach($Oemail as $email1){
+					$email = $email1[0];
+				}
+				echo "Name: $name <br/>";
+				echo "Gender: $gender <br/>";  
+				echo "Phone Number: $phone <br/>";  
+				echo "Email: $email <br/>";
             }
             else{
                 echo "Login to view profile";
@@ -213,22 +223,18 @@ $header = $user."'s ProFile";
             <?php
 
             echo "<h2>Friends</h2>";
-
-            $u= array();
-            $u=$userData[$user];
-
-            foreach($u['friends'] as $friend){
-                echo "<a href=\"profile.php?myUser=$friend\"><img src=".$userData[$friend]["picture"]." alt=".$friend." height=\"40\"></a> ";
+				$friends = getUsersFriends($user);
+            foreach($friends as $friend){
+				$s = getImageURL($friend[0]);
+				foreach($s as $source){
+					echo "<a href=\"profile.php?myUser=$friend\"><img src=\"$source[0]\" alt=\"$friend\" height=\"40\"></a>";
+				}
+                //
             }
             ?>
         </div>
 
         <?php include 'proj1Footer.html'; ?>
-
     </div>
-
-
     </div>
-
-
 <?php include 'Foot.html'; ?>

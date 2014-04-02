@@ -22,18 +22,8 @@ include 'Head.php';
         list($first, $second, $third, $forth) = explode('.', $ipaddr);
         ?>
         <?php
-        if(
-            (strcmp($first,"129")==0 && strcmp($second,"82")==0)
-            || strcmp($first,"::1")==0
-            || (strcmp($first,"67")==0 && strcmp($second,"174")==0 && strcmp($third,"106")==0 && strcmp($forth,"156")==0)
-
-        )
-
-        {
-            ?>
-
-            <?php
-            if($_SESSION['user'] == "admin"){
+        if(IpCheck()==0){
+			if($_SESSION['user'] == "admin"){
                 ?>
 
                 <form action= " " method = "post" enctype="multipart/form-data">
