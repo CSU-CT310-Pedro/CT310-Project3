@@ -57,22 +57,17 @@ function authenticate($user, $email){
 		$key = $k[0];
 	}
 
-	/*$randomKey = generateRandomString();
-	$bytes = openssl_random_pseudo_bytes(16, $cstrong);
-	$hex   = bin2hex($bytes);*/
-
 	$message = 'To complete your registration 
 	<a href="http://www.cs.colostate.edu/~bckelly1/Project3/addUser.php?user='.$user.
 	'&random='.$key.'"> click here.</a> You must be clicking this link 
 	from the IP address you used to register.';
 	
 	$message = wordwrap($message, 70, "\r\n");
-	
-	//echo $message;
+
 	$subject = "Two Factor Authentication";
-	
 	$headers  = 'MIME-Version: 1.0' . "\r\n";
 	$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
 	mail($email, $subject, $message, $headers);
 }
+
 ?>

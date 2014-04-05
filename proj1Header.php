@@ -1,6 +1,6 @@
 <div id="banner">
 	<div id="banner_pict">
-		<a href="index.php"><img class ="full" src="./banner.png" alt="ProFILE Logo" /></a>
+		<a href="index.php"><img class ="full" src="Images/banner.png" alt="ProFILE Logo" /></a>
 	</div>
 	<div id="banner_foot">
 	</div>

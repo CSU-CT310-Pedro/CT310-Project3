@@ -63,6 +63,8 @@ include 'Head.php';
 			$user2=$_POST["accept"];
 			$query = "INSERT INTO friends VALUES('$user1', '$user2');";
 			$db->exec($query);
+			$query = "INSERT INTO friends VALUES('$user2', '$user1');";
+			$db->exec($query);
 			
 			$query = "DELETE FROM requests WHERE user1='$user1' AND user2='$user2';";
 			$db->exec($query);

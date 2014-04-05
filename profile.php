@@ -3,9 +3,6 @@ $title = 'CT310 Social Networking User';
 include 'userData.php';
 include 'Head.php';
 $user= $_GET['myUser'];
-/*if($_SERVER["REQUEST_METHOD"]=="GET" || $_SERVER["REQUEST_METHOD"]=="POST"){
-    $user =  $_GET["myUser"];
-}*/
 $header = $user."'s ProFile";
 ?>
 
@@ -82,7 +79,6 @@ $header = $user."'s ProFile";
 				<?php 
 				$s = getImageURL($user);
 				foreach($s as $URL){
-					//print_r($URL[0]);
 					echo "<img class=\"full\" src=\"$URL[0] \" alt=\"$user's profile picture\"/>";
 				}
 				?>
@@ -99,8 +95,6 @@ $header = $user."'s ProFile";
                 # profile edit form
                 ?>
                 <form action= " " method = "post" enctype="multipart/form-data">
-                    <!--<input type="hidden" name="gender" value=""/>   I see no reason for this 
-                    <input type= "hidden" name="edit" value= "false" />     or this   -->
                     <table class="formTbl">
                         <tr>
                             <td>Name:</td>
@@ -186,10 +180,7 @@ $header = $user."'s ProFile";
             ?>
 
             <?php
-            #whitelist
-            $ipaddr = $_SERVER ['REMOTE_ADDR'];
-            list($first, $second, $third, $forth) = explode('.', $ipaddr);
-            if(IpCheck()!=0 && isset($_SESSION['user'])){
+            if(IpCheck()==0 && isset($_SESSION['user'])){
                 if($_SESSION['user']=="$user" && !isset($_POST['edit'])){
                     #show edit button of this is the logged in users profile
                     ?>
