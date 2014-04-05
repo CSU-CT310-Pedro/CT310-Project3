@@ -1,6 +1,7 @@
 <div id="nav">
     <a href="index.php">Home</a>
     | <a href="addFriends.php">Manage Friends</a>
+    | <a href="addUser.php">Register Here</a>
     <?php
     if(isset($_SESSION['user'])){
 		$db = new PDO('sqlite:./users.db');
@@ -13,7 +14,7 @@
 		}
 		
         if($admin==1){
-            echo "| <a href=\"addUser.php\">Add User</a>";
+            echo "| <a href=\"newUsers.php\">Approve Users</a>";
         }
 		echo "| <a href=\"logout.php\">Logout</a>";
     }

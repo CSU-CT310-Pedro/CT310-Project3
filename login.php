@@ -84,5 +84,4 @@ include 'Head.php';
             <?php include 'proj1Footer.html'; ?>
         </div>
     </div>
-
 <?php include 'Foot.html'; ?>

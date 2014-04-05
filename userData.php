@@ -14,12 +14,16 @@ function getUsers(){//returns an array of users
 $users = getUsers();
 
 function IpCheck(){
-	$ipArray='129.82.';
-	if (strpos($_SERVER['REMOTE_ADDR'], $ipArray)===0) {
-			return 0;
-	}else{
-			return 1;
+	$ipArray=array('129.82.', '65.128.28.114');
+	$ok = 1;//assume wrong ip until proven false
+	foreach($ipArray as $ip){
+		if (strpos($_SERVER['REMOTE_ADDR'], $ip)===0) {
+				return 0;
+		}else{
+				$ok=1;
+		}
 	}
+	return $ok;
 }
 
 function getImageURL($user){
@@ -38,5 +42,37 @@ function getUsersFriends($user){//gets the usernames of all friends of $user
 		array_push($usersFriends, $newUser);
 	}
 	return $usersFriends;
+}
+
+function generateRandomString($length = 32) {
+   return substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, $length);
+}
+
+function authenticate($user, $email){
+	$db = new PDO('sqlite:./users.db');
+	$query = "SELECT key FROM pending WHERE userName='$user';";
+	$oKey = $db->query($query);
+	$key = '';
+	foreach($oKey as $k){
+		$key = $k[0];
+	}
+
+	/*$randomKey = generateRandomString();
+	$bytes = openssl_random_pseudo_bytes(16, $cstrong);
+	$hex   = bin2hex($bytes);*/
+
+	$message = 'To complete your registration 
+	<a href="http://www.cs.colostate.edu/~bckelly1/Project3/addUser.php?user='.$user.
+	'&random='.$key.'"> click here.</a> You must be clicking this link 
+	from the IP address you used to register.';
+	
+	$message = wordwrap($message, 70, "\r\n");
+	
+	//echo $message;
+	$subject = "Two Factor Authentication";
+	
+	$headers  = 'MIME-Version: 1.0' . "\r\n";
+	$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+	mail($email, $subject, $message, $headers);
 }
 ?>

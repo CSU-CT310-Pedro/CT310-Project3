@@ -16,22 +16,7 @@ include 'Head.php';
 	<div id="content">
 			
 		<div id="sidebar_left">
-			<?php include "about.html"; 
-		$db = new PDO('sqlite:./users.db');
-		$query = "SELECT userName FROM users WHERE userName='Brian';";
-		$return=$db->query($query);
-		//print_r($return);
-		foreach($return as $r){
-			if(isset($r)){
-				echo"testing.$r";
-			}
-			else{
-				echo"not set";
-			}
-			//print_r($r);
-		}
-			
-			?>			
+			<?php include "about.html"; ?>			
 		</div>
 		
 		<div id="sidebar_right">

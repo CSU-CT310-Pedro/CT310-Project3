@@ -10,59 +10,80 @@ include 'Head.php';
 </div>
 <?php include 'nav.php'; 
 	$db = new PDO('sqlite:./users.db');
-	$user = $_SESSION['user'];
-	$query = "SELECT isAdmin FROM users WHERE userName='$user';";
-	$OIsAdmin = $db->query($query);
-	$admin =0;
-	foreach($OIsAdmin as $a){
-		$admin = $a[0];
-	}
 ?>
 
 <div id="content">
     <div id="sidebar_left">
         <?php
-        if(IpCheck()!=0){
-			if($admin==1){//multiple users can be admin
-                ?>
-                <form method="post" action = "addUser.php" enctype="multipart/form-data">
-					<table>
-						<tr><td>Full Name:</td> <td><input type="text" name="realName"/> </td></tr>
-						<tr><td>User Name:</td> <td><input type="text" name="userName"/> </td></tr>
-						<tr><td>Password:</td> <td><input type="password" name="newPass"/> </td></tr>
-						<tr><td>Confirm Password:</td> <td><input type="password" name="newPassConf"/> </td></tr>
-						<tr><td>Gender</td>
-                            <td><input type="radio" name="gender" value="Male"
-                                    <?php if($gender == "Male"){echo "checked";} ?> />Male
-                            </td>
-                        </tr>
-                        <tr><td></td>
-                            <td><input type="radio" name="gender" value="Female"
-                                    <?php if($gender == "Female"){echo "checked";} ?> />Female
-                            </td>
-                        </tr>
-                        <tr><td>PhoneNumber:</td>
-                            <td><input type="text" name="number"/><br/></td>
-                        </tr>
-                        <tr><td>Email:</td>
-                            <td><input type="text" name="email"/><br/></td>
-                        </tr>
-						<tr><td>Website:</td>
-                            <td><input type="text" name="url"/><br/></td>
-                        </tr>
-						<tr><td>Add a photo:</td> <td><input type="file" name="file"></td></tr>
-						<tr><td><input type="submit" value="Submit"/></td></tr>
-					</table>
-				</form>
-            <?php
-            }
-            else{
-                echo "Only admins can add users";
-            }
+		
+		if(isset($_GET['user']) && isset($_GET['random'])){
+			$db = new PDO('sqlite:./users.db');
+			$user=$_GET['user'];
+			$GETkey=$_GET['random'];
+			$rIP = $_SERVER['REMOTE_ADDR'];
+			
+			$query = "SELECT key FROM pending WHERE userName='$user';";
+			$oKey=$db->query($query);
+			$key = '';
+			foreach($oKey as $k){
+				$key = $k[0];
+			}
+			
+			$query = "SELECT ip FROM pending WHERE userName='$user';";
+			$oIP=$db->query($query);
+			$ip = '';
+			foreach($oIP as $i){
+				$ip = $i[0];
+			}
+			
+			if(($key == $_GET['random']) && ($ip == $_SERVER['REMOTE_ADDR'])){
+				$query = "UPDATE pending SET verified=1 WHERE userName='$user';";
+				$db->exec($query);
+				echo "Your account has been verified. The admins will now go about approving it.";
+			}
+			else{
+				echo "The key you provided or IP you are coming from is incorrect. </br>";
+				echo "key: $key vs:$GETkey</br>";
+				echo "IP: $ip vs: $rIP</br>";
+			}
+		}
+		
+        if(IpCheck()==0){
+			?>
+			<form method="post" action = "addUser.php" enctype="multipart/form-data">
+				<table>
+					<tr><td>Full Name:</td> <td><input type="text" name="realName"/> </td></tr>
+					<tr><td>User Name:</td> <td><input type="text" name="userName"/> </td></tr>
+					<tr><td>Password:</td> <td><input type="password" name="newPass"/> </td></tr>
+					<tr><td>Confirm Password:</td> <td><input type="password" name="newPassConf"/> </td></tr>
+					<tr><td>Gender</td>
+						<td><input type="radio" name="gender" value="Male"
+								<?php if($gender == "Male"){echo "checked";} ?> />Male
+						</td>
+					</tr>
+					<tr><td></td>
+						<td><input type="radio" name="gender" value="Female"
+								<?php if($gender == "Female"){echo "checked";} ?> />Female
+						</td>
+					</tr>
+					<tr><td>PhoneNumber:</td>
+						<td><input type="text" name="number"/><br/></td>
+					</tr>
+					<tr><td>Email:</td>
+						<td><input type="text" name="email"/><br/></td>
+					</tr>
+					<tr><td>Website:</td>
+						<td><input type="text" name="url"/><br/></td>
+					</tr>
+					<tr><td>Add a photo:</td> <td><input type="file" name="file"></td></tr>
+					<tr><td><input type="submit" value="Submit"/></td></tr>
+				</table>
+			</form>
+		<?php
         }
         else{
 			echo ($_SERVER['REMOTE_ADDR']);
-            echo "Your IP address is not white listed.";
+            echo "Your IP address is not white listed. You need to be using an approved IP address to create an account.";
         }
 		if(isset($_POST["userName"]) &&isset($_POST["realName"]) &&isset($_POST["newPass"]) &&isset($_POST["newPassConf"]) &&isset($_POST['gender'])&&isset($_POST["number"])&&isset($_POST["email"])){
 			$userName = strip_tags($_POST["userName"]);
@@ -74,6 +95,8 @@ include 'Head.php';
 			$number= strip_tags($_POST["number"]);
 			$email= strip_tags($_POST["email"]);
 			$url = strip_tags($_POST['url']);
+			$ip = $_SERVER['REMOTE_ADDR'];
+			$key = generateRandomString();//32 character random key
 			
 			if(preg_match("/^[A-z0-9]+$/",$userName)){//username must be letters and numers
 				if(preg_match("/^(?!.*\s).{8,}$/",$passwd)){//strlen($passwd)>=8) password must be longer than 8 characters
@@ -86,7 +109,7 @@ include 'Head.php';
 										if($_FILES["file"]["error"]==0){//file is not in error
 											$type = explode("/",$_FILES["file"]["type"]);
 											if($type[0]="image"){//file is an image
-												if($_FILES["file"]["size"]<100000){//size check
+												if($_FILES["file"]["size"]<1000000){//size check
 													$place="Images/$userName.jpg";
 													$flag = move_uploaded_file($_FILES["file"]["tmp_name"], $place);
 													//check if user already exists
@@ -100,8 +123,10 @@ include 'Head.php';
 														}
 													}
 													if($used==0){
-														$query = "INSERT INTO users VALUES('$userName', '$realName', '$md5passwd', 0, 0, 'Images/$userName.jpg', '$url', '$number', '$gender', '$email');";
+														$query = "INSERT INTO pending VALUES('$userName', '$realName', '$md5passwd', 0, 0, 'Images/$userName.jpg', '$url', '$number', '$gender', '$email', '$ip', '$key', 0, 0);";
 														$return=$db->exec($query);//add user now
+														echo "Your request has been submitted. A confirmation email will be sent to the specified email address.";
+														authenticate($userName, $email);
 													}
 													if($flag){
 														echo "file uploaded successfully";
