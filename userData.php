@@ -14,7 +14,7 @@ function getUsers(){//returns an array of users
 $users = getUsers();
 
 function IpCheck(){
-	$ipArray=array('129.82.', '65.128.28.114');
+	$ipArray=array('129.82.', '65.128.28.114', '67.174.106.156 ', '::1');
 	$ok = 1;//assume wrong ip until proven false
 	foreach($ipArray as $ip){
 		if (strpos($_SERVER['REMOTE_ADDR'], $ip)===0) {
@@ -42,6 +42,17 @@ function getUsersFriends($user){//gets the usernames of all friends of $user
 		array_push($usersFriends, $newUser);
 	}
 	return $usersFriends;
+}
+
+function getUsersReqs($user){//gets the usernames of all request from $user
+    $usersReqs=array();
+    $db = new PDO('sqlite:./users.db');
+    $query = "SELECT user2 FROM requests WHERE user1='$user';";
+    $requests = $db->query($query);
+    foreach($requests as $newUser){
+        array_push($usersReqs, $newUser);
+    }
+    return $usersReqs;
 }
 
 function generateRandomString($length = 32) {

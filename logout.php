@@ -1,5 +1,5 @@
-<?php 
-	include 'phpHeader.php';
+<?php
+
 
 	session_start();
 	unset($_SESSION['user']);

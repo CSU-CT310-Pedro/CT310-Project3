@@ -161,6 +161,19 @@ div.content {
   text-align: justify;
 }
 
+div.friendThumbnail{
+    float:left;
+}
+
+div.acceptRegForm{
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+div.spacer{
+    clear:both;
+}
+
 img.thumbnail {
 	height: 15%;
 	width: 90%;
