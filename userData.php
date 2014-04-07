@@ -55,6 +55,50 @@ function getUsersReqs($user){//gets the usernames of all request from $user
     return $usersReqs;
 }
 
+function getPosts($user){
+
+    $postsForUser=array();
+
+    $db = new PDO('sqlite:./users.db');
+
+    $sth = $db->prepare("SELECT * FROM posts;");
+    $sth->execute();
+
+    $allPosts = $sth->fetchAll();
+    $post= array();
+
+    foreach($allPosts as $p){
+        if($p['receiver']=="$user"){
+            $post['id']=$p['id'];
+            $post['sender']=$p['sender'];
+            $post['receiver']=$p['receiver'];
+            $post['time']=$p['time'];
+            $post['message']=$p['message'];
+
+            if($p['response']==0){
+                $postsForUser[$p['id']]=$post;
+                $postsForUser[$p['id']]['responses']=array();
+            }
+            else{
+                array_push($postsForUser[$p['response']]['responses'], $post);
+            }
+        }
+    }
+    return $postsForUser;
+}
+
+function postID(){
+    $db = new PDO('sqlite:./users.db');
+    $query = "SELECT COUNT(*) FROM posts;";
+    $count = $db->query($query);
+
+    foreach($count as $c){
+        $id = $c[0]+1;
+    }
+
+    return $id;
+}
+
 function generateRandomString($length = 32) {
    return substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, $length);
 }
@@ -80,5 +124,6 @@ function authenticate($user, $email){
 	$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
 	mail($email, $subject, $message, $headers);
 }
+
 
 ?>

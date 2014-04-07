@@ -8,7 +8,11 @@ $header = $user."'s ProFile";
 
     <div id="body-container">
     <div id="header">
-        <?php include 'proj1Header.php';
+        <?php
+
+        include 'proj1Header.php';
+
+        date_default_timezone_set ( 'America/Denver' );
 
         #check to see if user is making profile edit
         if(isset($_POST['edited'])){
@@ -57,6 +61,8 @@ $header = $user."'s ProFile";
                                 //$image = ".$_FILES[\"file\"][\"name\"]";//TODO
                                 //$query = "UPDATE users SET image='Images/$image' WHERE userName='$user';";//TODO
                                 //$db->exec($query);
+
+                                //add email update for to profile page owner//TODO
                             }
                         }
                     }
@@ -101,6 +107,42 @@ $header = $user."'s ProFile";
             #echo "$query<br/>";
             $resp = $db->query($query);
 
+            //add email update for to profile page owner//TODO
+
+        }
+
+        if(isset($_POST['comment'])){
+            $db = new PDO('sqlite:./users.db');
+
+            $response=0;
+            $sender=$_SESSION['user'];
+            $receiver=$_GET['myUser'];
+            $time=date ( "l d, M. g:i a", time () );
+            $message=filter_var($_POST['comment'], FILTER_SANITIZE_STRING);
+            $id=postID();
+
+            $query = "INSERT INTO posts VALUES($id, $response, \"$sender\", \"$receiver\", \"$time\", \"$message\");";
+            $db->exec($query);
+
+            //add email update for to profile page owner//TODO
+
+
+        }
+        if(isset($_POST['response'])){
+
+            $db = new PDO('sqlite:./users.db');
+
+            $response=$_POST['respID'];
+            $sender=$_SESSION['user'];
+            $receiver=$_GET['myUser'];
+            $time=date ( "l d, M. g:i a", time () );
+            $message=filter_var($_POST['response'], FILTER_SANITIZE_STRING);
+            $id=postID();
+
+            $query = "INSERT INTO posts VALUES($id, $response, \"$sender\", \"$receiver\", \"$time\", \"$message\");";
+            $db->exec($query);
+
+            //add email update for to profile page owner//TODO
         }
 
         ?>
@@ -167,182 +209,266 @@ $header = $user."'s ProFile";
     </div>
 
     <div id="sidebar_right">
-        <h2> <?php echo $user;?>'s Profile</h2>
+    <h2> <?php echo $user;?>'s Profile</h2>
 
 
-        <?php
-        if(isset($_POST['edit'])){
-            # profile edit form
+    <?php
+    if(isset($_POST['edit'])){
+        # profile edit form
+        ?>
+        <form action= " " method = "post" enctype="multipart/form-data">
+            <input type= "hidden" name="edited" value= "true" />
+            <table class="formTbl">
+                <tr>
+                    <td>Name:</td>
+                    <td>
+                        <input type="text" name="name" value="<?php echo $_POST['name']?>" /><br/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Gender</td>
+                    <td>
+                        <input type="radio" name="gender" value="Male" <?php if($_POST['gender']=="Male"){echo "checked";}?>/>Male
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <input type="radio" name="gender" value="Female" <?php if($_POST['gender']=="Female"){echo "checked";}?>/>Female
+                    </td>
+                </tr>
+                <tr>
+                    <td>PhoneNumber:</td>
+                    <td>
+                        <input type="text" name="number" value="<?php echo $_POST['phone']?>"/><br/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Email:</td>
+                    <td>
+                        <input type="text" name="email" value="<?php echo $_POST['email']?>"/><br/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Image:</td>
+                    <td>
+                        <input type="file" name="file" ><br/>
+                    </td>
+                </tr>
+
+            </table>
+            <input type="submit" value= "Submit">
+        </form>
+
+    <?php
+    }
+    elseif(isset($_SESSION['user'])){
+        #show profile info if user is logged in
+        $user= $_GET['myUser'];
+        $db = new PDO('sqlite:./users.db');
+        $query = "SELECT realName FROM users WHERE userName='$user';";
+        $Oname = $db->query($query);
+        $name="";
+        foreach($Oname as $name1){
+            $name = $name1[0];
+        }
+
+        $query = "SELECT gender FROM users WHERE userName='$user';";
+        $Ogender = $db->query($query);
+        $gender="";
+        foreach($Ogender as $gender1){
+            $gender = $gender1[0];
+        }
+
+        $query = "SELECT phone FROM users WHERE userName='$user';";
+        $OPhone = $db->query($query);
+        $phone="";
+        foreach($OPhone as $phone1){
+            $phone = $phone1[0];
+        }
+
+        $query = "SELECT email FROM users WHERE userName='$user';";
+        $Oemail = $db->query($query);
+        $email="";
+        foreach($Oemail as $email1){
+            $email = $email1[0];
+        }
+
+        echo "Name: $name <br/>";
+        echo "Gender: $gender <br/>";
+        echo "Phone Number: $phone <br/>";
+        echo "Email: $email <br/>";
+
+
+    }
+    else{
+        echo "Login to view profile";
+    }
+    ?>
+
+    <?php
+    if(IpCheck()==0 && isset($_SESSION['user'])){
+        $user= $_GET['myUser'];
+        if($_SESSION['user']=="$user" && !isset($_POST['edit'])){
+            #show edit button of this is the logged in users profile
             ?>
-            <form action= " " method = "post" enctype="multipart/form-data">
-                <input type= "hidden" name="edited" value= "true" />
-                <table class="formTbl">
-                    <tr>
-                        <td>Name:</td>
-                        <td>
-                            <input type="text" name="name" value="<?php echo $_POST['name']?>" /><br/>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Gender</td>
-                        <td>
-                            <input type="radio" name="gender" value="Male" <?php if($_POST['gender']=="Male"){echo "checked";}?>/>Male
-                        </td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td>
-                            <input type="radio" name="gender" value="Female" <?php if($_POST['gender']=="Female"){echo "checked";}?>/>Female
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>PhoneNumber:</td>
-                        <td>
-                            <input type="text" name="number" value="<?php echo $_POST['phone']?>"/><br/>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Email:</td>
-                        <td>
-                            <input type="text" name="email" value="<?php echo $_POST['email']?>"/><br/>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Image:</td>
-                        <td>
-                            <input type="file" name="file" ><br/>
-                        </td>
-                    </tr>
-
-                </table>
-                <input type="submit" value= "Submit">
+            <form method="post" action="">
+                <input type= "hidden" name="edit" value= "true" />
+                <input type= "hidden" name="name" value="<?php echo $name?>" />
+                <input type= "hidden" name="gender" value="<?php echo $gender?>" />
+                <input type= "hidden" name="phone" value= "<?php echo $phone?>" />
+                <input type= "hidden" name="email" value= "<?php echo $email?>" />
+                <input type= "submit" value="Edit"/>
             </form>
+            <br/>
 
         <?php
         }
-        elseif(isset($_SESSION['user'])){
-            #show profile info if user is logged in
-            $user= $_GET['myUser'];
-            $db = new PDO('sqlite:./users.db');
-            $query = "SELECT realName FROM users WHERE userName='$user';";
-            $Oname = $db->query($query);
-            $name="";
-            foreach($Oname as $name1){
-                $name = $name1[0];
-            }
-
-            $query = "SELECT gender FROM users WHERE userName='$user';";
-            $Ogender = $db->query($query);
-            $gender="";
-            foreach($Ogender as $gender1){
-                $gender = $gender1[0];
-            }
-
-            $query = "SELECT phone FROM users WHERE userName='$user';";
-            $OPhone = $db->query($query);
-            $phone="";
-            foreach($OPhone as $phone1){
-                $phone = $phone1[0];
-            }
-
-            $query = "SELECT email FROM users WHERE userName='$user';";
-            $Oemail = $db->query($query);
-            $email="";
-            foreach($Oemail as $email1){
-                $email = $email1[0];
-            }
-
-            echo "Name: $name <br/>";
-            echo "Gender: $gender <br/>";
-            echo "Phone Number: $phone <br/>";
-            echo "Email: $email <br/>";
-
-
+    }
+    else{
+        echo "</br> You need to be whitelisted and logged in to edit!";
+    }
+    echo "<h2>Friends</h2>";
+    $friends = getUsersFriends($user);
+    foreach($friends as $friend){
+        $s = getImageURL($friend[0]);
+        foreach($s as $source){
+            echo "<a href=\"profile.php?myUser=$friend[0]\"><img src=\"$source[0]\" alt=\"$friend[0]\" height=\"40\"></a>";
         }
-        else{
-            echo "Login to view profile";
-        }
-        ?>
+    }
 
-        <?php
-        if(IpCheck()==0 && isset($_SESSION['user'])){
-            $user= $_GET['myUser'];
-            if($_SESSION['user']=="$user" && !isset($_POST['edit'])){
-                #show edit button of this is the logged in users profile
-                ?>
-                <form method="post" action="">
-                    <input type= "hidden" name="edit" value= "true" />
-                    <input type= "hidden" name="name" value="<?php echo $name?>" />
-                    <input type= "hidden" name="gender" value="<?php echo $gender?>" />
-                    <input type= "hidden" name="phone" value= "<?php echo $phone?>" />
-                    <input type= "hidden" name="email" value= "<?php echo $email?>" />
-                    <input type= "submit" value="Edit"/>
-                </form>
+
+    //display pending requests from others if this is your profile
+    if(isset($_SESSION['user']) && $_SESSION['user']=="$user"){
+        $u=$_SESSION['user'];
+        $db = new PDO('sqlite:./users.db');
+        $query = "SELECT user1 FROM requests WHERE user2='$u';";
+        $friends = $db->query($query);
+
+        foreach($friends as $request){
+
+            ?>
+
+            <div class="spacer">
                 <br/>
+            </div>
 
             <?php
+
+            $query = "SELECT imageurl FROM users WHERE userName='$request[0]';";
+            $OURL = $db->query($query);
+            $URL = "";
+            foreach($OURL as $O){
+                $URL = $O[0];
             }
+            echo "<div class='friendThumbnail'>";
+            echo "<a href=\"profile.php?myUser=$request[0]\"><img src=\"$URL\" alt=\"$request[0] \'s profile picture \" height=\"40\"></a><br/>";
+            echo "$request[0]<br/>" ;
+            echo "</div>";
+            ?>
+
+            <div class="acceptRegForm">
+                <form method="post" action="">
+                    <input type= "hidden" name="accept" value= "<?php echo $request[0];?>" />
+                    <input type= "submit" value="Accept"/></br>
+                </form>
+                <form method="post" action="">
+                    <input type= "hidden" name="reject" value= "<?php echo $request[0];?>" />
+                    <input type= "submit" value="Reject"/></br>
+                </form>
+            </div>
+
+            <div class="spacer">
+            </div>
+        <?php
         }
-        else{
-            echo "</br> You need to be whitelisted and logged in to edit!";
-        }
-        echo "<h2>Friends</h2>";
-        $friends = getUsersFriends($user);
-        foreach($friends as $friend){
-            $s = getImageURL($friend[0]);
+    }
+    ?>
+
+
+    <h2>Wall</h2>
+    <div class="wall">
+
+        <div class="commentArea">
+            <form method="post" action="">
+                <textarea class="post" name="comment">Write Something...</textarea><br/>
+                <input type= "submit" value="Post"/>
+            </form>
+        </div>
+
+        <?php
+
+        $posts=getPosts($user);
+        foreach(array_reverse($posts) as $post){
+            echo "<div class='post'>";
+            $sender=$post['sender'];
+            $time=$post['time'];
+            $message=$post['message'];
+            $s=getImageURL($sender);
+            $imgURL="";
+
             foreach($s as $source){
-                echo "<a href=\"profile.php?myUser=$friend[0]\"><img src=\"$source[0]\" alt=\"$friend[0]\" height=\"40\"></a>";
+                $imgURL = $source[0];
             }
-        }
+
+            echo "<div class=\"friendThumbnail\">";
+            echo "<a href='profile.php?myUser=$sender'><img src='$imgURL' alt='$sender' height='50'></a>";
+            echo "</div>";
+
+            echo "<div class=\"acceptRegForm\">";
+            echo "$sender <br/>";
+            echo "$time<br/>";
+            echo "</div>";
+
+            echo "<div class=\"spacer\">";
+            echo "$message<br/>";
+            echo "</div>";
+
+            $responses= $post['responses'];
 
 
-        //display pending requests from others if this is your profile
-        if(isset($_SESSION['user']) && $_SESSION['user']=="$user"){
-            $u=$_SESSION['user'];
-            $db = new PDO('sqlite:./users.db');
-            $query = "SELECT user1 FROM requests WHERE user2='$u';";
-            $friends = $db->query($query);
+            foreach($responses as $r){
+                echo "<div class='subpost'>";
+                $sender=$r['sender'];
+                $time=$r['time'];
+                $message=$r['message'];
+                $s=getImageURL($sender);
+                $imgURL="";
 
-            foreach($friends as $request){
-
-                ?>
-
-                <div class="spacer">
-                    <br/>
-                </div>
-
-                <?php
-
-                $query = "SELECT imageurl FROM users WHERE userName='$request[0]';";
-                $OURL = $db->query($query);
-                $URL = "";
-                foreach($OURL as $O){
-                    $URL = $O[0];
+                foreach($s as $source){
+                    $imgURL = $source[0];
                 }
-                echo "<div class='friendThumbnail'>";
-                echo "<a href=\"profile.php?myUser=$request[0]\"><img src=\"$URL\" alt=\"$request[0] \'s profile picture \" height=\"40\"></a><br/>";
-                echo "$request[0]<br/>" ;
+                echo "<div class=\"friendThumbnail\">";
+                echo "<a href='profile.php?myUser=$sender'><img src='$imgURL' alt='$sender' height='50'></a>";
                 echo "</div>";
-                ?>
 
-                <div class="acceptRegForm">
-                    <form method="post" action="">
-                        <input type= "hidden" name="accept" value= "<?php echo $request[0];?>" />
-                        <input type= "submit" value="Accept"/></br>
-                    </form>
-                    <form method="post" action="">
-                        <input type= "hidden" name="reject" value= "<?php echo $request[0];?>" />
-                        <input type= "submit" value="Reject"/></br>
-                    </form>
-                </div>
+                echo "<div class=\"acceptRegForm\">";
+                echo "$sender <br/>";
+                echo "$time<br/>";
+                echo "</div>";
 
-                <div class="spacer">
-                </div>
-            <?php
+                echo "<div class=\"spacer\">";
+                echo "$message<br/>";
+                echo "</div>";
+                echo "</div>";
             }
-        }
 
+
+            ?>
+            <div class="responseArea">
+                <form method="post" action="">
+                    <input type="hidden" name="respID" value="<?php echo $post['id'];?>">
+                    <textarea class="respond" name="response">Comment...</textarea><br/>
+                    <input type= "submit" value="Post"/>
+                </form>
+            </div>
+            <?php
+
+            echo "</div>";
+            #echo "</div>";
+        }
         ?>
+    </div>
     </div>
     <?php include 'proj1Footer.html'; ?>
     </div>
