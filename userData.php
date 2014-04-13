@@ -41,7 +41,19 @@ function getUsersFriends($user){//gets the usernames of all friends of $user
 	foreach($friends as $newUser){
 		array_push($usersFriends, $newUser);
 	}
+    #print_r($usersFriends);
 	return $usersFriends;
+}
+
+function isFriend($user, $friend){
+    $isFriend=false;
+    $friends= getUsersFriends($user);
+    foreach($friends as $f){
+        if(in_array($friend,$f)){
+            $isFriend=true;
+        }
+    }
+    return $isFriend;
 }
 
 function getUsersReqs($user){//gets the usernames of all request from $user

@@ -387,57 +387,37 @@ $header = $user."'s ProFile";
 
 
     <h2>Wall</h2>
+
     <div class="wall">
-
-        <div class="commentArea">
-            <form method="post" action="">
-                <textarea class="post" name="comment">Write Something...</textarea><br/>
-                <input type= "submit" value="Post"/>
-            </form>
-        </div>
-
         <?php
+        if(isset( $_SESSION['user'] ) && $_SESSION['user']!=""){
+            $isFriend = isFriend($user,$loggedIn);
+            if($isFriend || $user==$loggedIn){
+                ?>
 
-        $posts=getPosts($user);
-        foreach(array_reverse($posts) as $post){
-            echo "<div class='post'>";
-            $sender=$post['sender'];
-            $time=$post['time'];
-            $message=$post['message'];
-            $s=getImageURL($sender);
-            $imgURL="";
+                <div class="commentArea">
+                    <form method="post" action="">
+                        <textarea class="post" name="comment">Write Something...</textarea><br/>
+                        <input type= "submit" value="Post"/>
+                    </form>
+                </div>
 
-            foreach($s as $source){
-                $imgURL = $source[0];
+            <?php
             }
 
-            echo "<div class=\"friendThumbnail\">";
-            echo "<a href='profile.php?myUser=$sender'><img src='$imgURL' alt='$sender' height='50'></a>";
-            echo "</div>";
-
-            echo "<div class=\"acceptRegForm\">";
-            echo "$sender <br/>";
-            echo "$time<br/>";
-            echo "</div>";
-
-            echo "<div class=\"spacer\">";
-            echo "$message<br/>";
-            echo "</div>";
-
-            $responses= $post['responses'];
-
-
-            foreach($responses as $r){
-                echo "<div class='subpost'>";
-                $sender=$r['sender'];
-                $time=$r['time'];
-                $message=$r['message'];
+            $posts=getPosts($user);
+            foreach(array_reverse($posts) as $post){
+                echo "<div class='post'>";
+                $sender=$post['sender'];
+                $time=$post['time'];
+                $message=$post['message'];
                 $s=getImageURL($sender);
                 $imgURL="";
 
                 foreach($s as $source){
                     $imgURL = $source[0];
                 }
+
                 echo "<div class=\"friendThumbnail\">";
                 echo "<a href='profile.php?myUser=$sender'><img src='$imgURL' alt='$sender' height='50'></a>";
                 echo "</div>";
@@ -450,22 +430,54 @@ $header = $user."'s ProFile";
                 echo "<div class=\"spacer\">";
                 echo "$message<br/>";
                 echo "</div>";
+
+                $responses= $post['responses'];
+
+
+                foreach($responses as $r){
+                    echo "<div class='subpost'>";
+                    $sender=$r['sender'];
+                    $time=$r['time'];
+                    $message=$r['message'];
+                    $s=getImageURL($sender);
+                    $imgURL="";
+
+                    foreach($s as $source){
+                        $imgURL = $source[0];
+                    }
+                    echo "<div class=\"friendThumbnail\">";
+                    echo "<a href='profile.php?myUser=$sender'><img src='$imgURL' alt='$sender' height='50'></a>";
+                    echo "</div>";
+
+                    echo "<div class=\"acceptRegForm\">";
+                    echo "$sender <br/>";
+                    echo "$time<br/>";
+                    echo "</div>";
+
+                    echo "<div class=\"spacer\">";
+                    echo "$message<br/>";
+                    echo "</div>";
+                    echo "</div>";
+                }
+
+                if($isFriend||$user==$loggedIn){
+                    ?>
+                    <div class="responseArea">
+                        <form method="post" action="">
+                            <input type="hidden" name="respID" value="<?php echo $post['id'];?>">
+                            <textarea class="respond" name="response">Comment...</textarea><br/>
+                            <input type= "submit" value="Post"/>
+                        </form>
+                    </div>
+                <?php
+                }
+
                 echo "</div>";
+                #echo "</div>";
             }
-
-
-            ?>
-            <div class="responseArea">
-                <form method="post" action="">
-                    <input type="hidden" name="respID" value="<?php echo $post['id'];?>">
-                    <textarea class="respond" name="response">Comment...</textarea><br/>
-                    <input type= "submit" value="Post"/>
-                </form>
-            </div>
-            <?php
-
-            echo "</div>";
-            #echo "</div>";
+        }
+        else{
+            echo "Login to view posts.";
         }
         ?>
     </div>

@@ -32,8 +32,8 @@ include 'Head.php';
                     $_SESSION['user'] = $user;
                 }
                 else{
-					echo "$user";
-					echo "$hash";
+					#echo "$user";
+					#echo "$hash";
                     $invalid= true;
                 }
             }
