@@ -144,6 +144,75 @@ $header = $user."'s ProFile";
 
             //add email update for to profile page owner//TODO
         }
+        
+        if(isset($_GET['random'])){
+			//ip check, then update
+			print_r($user);
+			$db = new PDO('sqlite:./users.db');
+			$query = "SELECT ip FROM newPassRequest WHERE userName='$user';";
+			$oIp = $db->query($query);
+			$ip = '';
+			foreach($oIp as $I){
+				$ip = $I[0];
+			}
+
+			$query = "SELECT hash FROM newPassRequest WHERE userName='$user';";
+			$oHash = $db->query($query);
+			$hash = '';
+			foreach($oHash as $H){
+				$hash = $H[0];
+			}
+			
+			if($ip==$_SERVER['REMOTE_ADDR']){
+				$query = "UPDATE users SET hash='$hash' WHERE userName='$user';";
+				$db->exec($query);
+				
+				echo "<p>Password has been reset!</p>";
+				$query = "DELETE FROM newPassRequest WHERE userName='$user';";
+				$db->exec($query);
+			}
+			else{
+				echo "You are not coming from the same address as you used to register";
+				$s=$_SERVER['REMOTE_ADDR'];
+				echo "$ip  and   $s";
+			}
+		}
+		
+		if(isset($_POST['newPass']) && isset($_POST['confNewPass'])){//password reset
+			if($_POST['newPass'] == $_POST['confNewPass']){
+				$hash = md5($_POST['newPass']);
+				$db = new PDO('sqlite:./users.db');
+				$query = "SELECT email FROM users WHERE userName='$user';";
+				$oEmail = $db->query($query);
+				$email = '';
+				foreach($oEmail as $e){
+					$email = $e[0];
+				}
+				$key = generateRandomString();
+				$ip=$_SERVER['REMOTE_ADDR'];
+				$query = "INSERT INTO newPassRequest VALUES('$user', '$hash', '$key', '$ip')";
+				print_r("$user, $hash, $key, $ip");
+				$db->exec($query);
+				
+				$message = 'To complete your password reset 
+				<a href="http://www.cs.colostate.edu/~bckelly1/Project3/profile.php?myUser='.$user.
+				'&random='.$key.'"> click here.</a> You must be clicking this link 
+				from the IP address you used request the password change.';
+				
+				$message = wordwrap($message, 70, "\r\n");
+
+				$subject = "Password Reset";
+				$headers  = 'MIME-Version: 1.0' . "\r\n";
+				$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+				mail($email, $subject, $message, $headers);
+				
+				print_r ("Your new password request has been submitted. Please check your email.");
+				//print_r ($email );
+			}
+			else{
+				echo "New passwords do not match!";
+			}
+		}
 
         ?>
 
@@ -321,7 +390,12 @@ $header = $user."'s ProFile";
                 <input type= "submit" value="Edit"/>
             </form>
             <br/>
-
+            <p>Change your password here:</p>
+			<form method="post" action="">
+				<h4>Password</h4><input type="password" name="newPass">
+				<h4>Confirm Password</h4><input type="password" name="confNewPass">
+				<input type= "submit" value="Submit"/>
+			</form>
         <?php
         }
     }
