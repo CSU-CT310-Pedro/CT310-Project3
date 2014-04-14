@@ -191,7 +191,6 @@ $header = $user."'s ProFile";
 				$key = generateRandomString();
 				$ip=$_SERVER['REMOTE_ADDR'];
 				$query = "INSERT INTO newPassRequest VALUES('$user', '$hash', '$key', '$ip')";
-				print_r("$user, $hash, $key, $ip");
 				$db->exec($query);
 				
 				$message = 'To complete your password reset 
@@ -207,7 +206,6 @@ $header = $user."'s ProFile";
 				mail($email, $subject, $message, $headers);
 				
 				print_r ("Your new password request has been submitted. Please check your email.");
-				//print_r ($email );
 			}
 			else{
 				echo "New passwords do not match!";
