@@ -223,12 +223,13 @@ $header = $user."'s ProFile";
         <div class="pict">
             <?php
             $user= $_GET['myUser'];
-            $loggedIn= $_SESSION['user'];
+            if(isset($_SESSION['user'])){
+                $loggedIn= $_SESSION['user'];
+            }
             $s = getImageURL($user);
             foreach($s as $URL){
                 echo "<img class=\"full\" src=\"$URL[0] \" alt=\"$user's profile picture\"/>";
             }
-
 
             ?>
 
