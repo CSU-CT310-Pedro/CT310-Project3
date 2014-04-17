@@ -112,6 +112,7 @@ include 'Head.php';
 												if($_FILES["file"]["size"]<1000000){//size check
 													$place="Images/$userName.jpg";
 													$flag = move_uploaded_file($_FILES["file"]["tmp_name"], $place);
+													chmod($place, 0755);//change permission on uploaded file to allow picture to be shown.
 													//check if user already exists
 													$used=0;
 													$query = "SELECT userName FROM users WHERE userName='$userName';";
